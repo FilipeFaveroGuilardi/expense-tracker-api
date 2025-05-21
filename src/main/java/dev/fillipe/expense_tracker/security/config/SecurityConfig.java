@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
     public static String[] PUBLIC_URLS = {"/auth/login", "/auth/register"};
+    public static String[] EXPENSES_URLS = {"/expense"};
 
 
     @Autowired
@@ -31,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequest ->
                         authorizeRequest
                                 .requestMatchers(PUBLIC_URLS).permitAll()
+                                .requestMatchers(EXPENSES_URLS).hasAuthority("USER")
                                 .anyRequest().denyAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
