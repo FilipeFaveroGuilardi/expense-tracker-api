@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthorizationService {
@@ -33,6 +34,11 @@ public class AuthorizationService {
     private SecurityConfig securityConfig;
 
     public String login(LoginAuthDTO loginAuthDTO) {
+
+        if (loginAuthDTO.email().isBlank() || loginAuthDTO.password().isBlank()) {
+            throw new AuthenticationServiceException("Email and password cannot be blank");
+        }
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginAuthDTO.email(), loginAuthDTO.password());
 
         Authentication auth = authenticationManager.authenticate(authenticationToken);
@@ -43,6 +49,16 @@ public class AuthorizationService {
     }
 
     public void register(RegisterAuthDTO registerAuthDTO, RoleName role) {
+        Optional<User> userOptional = userRepository.findByEmail(registerAuthDTO.email());
+
+        if (userOptional.isPresent()) {
+            throw new AuthenticationServiceException("User already exists");
+        }
+
+        if (registerAuthDTO.password().isBlank() || registerAuthDTO.email().isBlank()) {
+            throw new AuthenticationServiceException("Email and password cannot be blank");
+        }
+
         User user = User.builder()
                 .email(registerAuthDTO.email())
                 .password(securityConfig.passwordEncoder().encode(registerAuthDTO.password()))

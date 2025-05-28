@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
     public static String[] PUBLIC_URLS = {"/auth/login", "/auth/register"};
-    public static String[] EXPENSES_URLS = {"/expense"};
+    public static String[] EXPENSES_URLS = {"/expense", "/expense/{id}"};
 
 
     @Autowired
