@@ -1,5 +1,6 @@
 package dev.fillipe.expense_tracker.security.jwt;
 
+import dev.fillipe.expense_tracker.exceptions.auth.TokenNotFoundException;
 import dev.fillipe.expense_tracker.security.config.SecurityConfig;
 import dev.fillipe.expense_tracker.security.userdetails.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
@@ -31,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = recoveryToken(request);
 
             if (token == null) {
-                throw new RuntimeException("Token not found");
+                throw new TokenNotFoundException();
             }
 
             String subject = jwtTokenService.retrieveSubject(token);

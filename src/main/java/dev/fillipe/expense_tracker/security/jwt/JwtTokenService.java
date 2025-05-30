@@ -50,7 +50,7 @@ public class JwtTokenService {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException e) {
-            throw new JWTVerificationException("Error verifying token", e);
+            throw new JWTVerificationException("Without permission", e);
         }
     }
 

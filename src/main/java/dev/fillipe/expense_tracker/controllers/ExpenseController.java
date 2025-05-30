@@ -72,8 +72,4 @@ public class ExpenseController {
         return ResponseEntity.status(204).build();
     }
 
-    @DeleteMapping
-    public void deleteallusers() {
-        expenseService.deleteallusers();
-    }
 }

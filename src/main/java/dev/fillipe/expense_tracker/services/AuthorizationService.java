@@ -3,6 +3,8 @@ package dev.fillipe.expense_tracker.services;
 import dev.fillipe.expense_tracker.dto.input.RegisterAuthDTO;
 import dev.fillipe.expense_tracker.dto.input.LoginAuthDTO;
 import dev.fillipe.expense_tracker.enums.RoleName;
+import dev.fillipe.expense_tracker.exceptions.user.UserAlreadyExistsException;
+import dev.fillipe.expense_tracker.exceptions.user.UserInvalidCredentialsException;
 import dev.fillipe.expense_tracker.models.Role;
 import dev.fillipe.expense_tracker.models.User;
 import dev.fillipe.expense_tracker.repositories.UserRepository;
@@ -36,7 +38,7 @@ public class AuthorizationService {
     public String login(LoginAuthDTO loginAuthDTO) {
 
         if (loginAuthDTO.email().isBlank() || loginAuthDTO.password().isBlank()) {
-            throw new AuthenticationServiceException("Email and password cannot be blank");
+            throw new UserInvalidCredentialsException();
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginAuthDTO.email(), loginAuthDTO.password());
@@ -52,11 +54,11 @@ public class AuthorizationService {
         Optional<User> userOptional = userRepository.findByEmail(registerAuthDTO.email());
 
         if (userOptional.isPresent()) {
-            throw new AuthenticationServiceException("User already exists");
+            throw new UserAlreadyExistsException();
         }
 
         if (registerAuthDTO.password().isBlank() || registerAuthDTO.email().isBlank()) {
-            throw new AuthenticationServiceException("Email and password cannot be blank");
+            throw new UserInvalidCredentialsException();
         }
 
         User user = User.builder()

@@ -33,7 +33,7 @@ public class SecurityConfig {
                         authorizeRequest
                                 .requestMatchers(PUBLIC_URLS).permitAll()
                                 .requestMatchers(EXPENSES_URLS).hasAuthority("USER")
-                                .anyRequest().denyAll()
+                                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

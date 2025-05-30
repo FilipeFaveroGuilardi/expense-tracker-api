@@ -4,6 +4,10 @@ import dev.fillipe.expense_tracker.dto.input.CreateExpenseDTO;
 import dev.fillipe.expense_tracker.dto.output.ExpenseDTO;
 import dev.fillipe.expense_tracker.dto.output.ListExpensesDTO;
 import dev.fillipe.expense_tracker.enums.ExpenseFilterEnum;
+import dev.fillipe.expense_tracker.exceptions.expenses.ExpenseDoesNotExistsException;
+import dev.fillipe.expense_tracker.exceptions.expenses.ExpenseInvalidAmountException;
+import dev.fillipe.expense_tracker.exceptions.expenses.ExpenseInvalidDateException;
+import dev.fillipe.expense_tracker.exceptions.expenses.ExpenseNotOwnedByUserException;
 import dev.fillipe.expense_tracker.models.Expense;
 import dev.fillipe.expense_tracker.models.User;
 import dev.fillipe.expense_tracker.repositories.ExpenseRepository;
@@ -55,12 +59,10 @@ public class ExpenseService {
                 startDate = startDateCustom;
                 endDate = endDateCustom;
                 break;
-            default:
-                throw new IllegalArgumentException("Invalid date filter");
         }
 
         if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date cannot be after end date");
+            throw new ExpenseInvalidDateException();
         }
 
         List<Expense> expensesRetrieved = expenseRepository.findByUserIDAndBetweenDates(user.getId(), startDate, endDate);
@@ -74,10 +76,10 @@ public class ExpenseService {
         LocalDate date = LocalDate.parse(expense.date(), Expense.DATE_FORMATTER);
 
         if (expense.amount().doubleValue() < 0) {
-            throw new IllegalArgumentException("Amount cannot be negative");
+            throw new ExpenseInvalidAmountException();
         }
         if (date.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Date cannot be in the future");
+            throw new ExpenseInvalidDateException();
         }
 
         Expense newExpense = Expense.builder()
@@ -91,38 +93,36 @@ public class ExpenseService {
     }
     public void deleteExpense(String token, Long expenseId) {
         User user = getUserFromJwtToken(token);
-        Expense expense = expenseRepository.findById(expenseId).orElseThrow(RuntimeException::new);
+        Expense expense = expenseRepository.findById(expenseId).orElseThrow(ExpenseDoesNotExistsException::new);
 
         if (!expense.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Expense does not belong to the user");
+            throw new ExpenseNotOwnedByUserException();
         }
+
 
         expenseRepository.delete(expense);
     }
     public void updateExpense(String token, Long expenseId, LocalDate date, Double amount, String description) {
         User user = getUserFromJwtToken(token);
-        Expense expense = expenseRepository.findById(expenseId).orElseThrow(RuntimeException::new);
+        Expense expense = expenseRepository.findById(expenseId).orElseThrow(ExpenseDoesNotExistsException::new);
 
         if (!expense.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("Expense does not belong to the user");
+            throw new ExpenseNotOwnedByUserException();
         }
 
 
-        if (!date.isEqual(expense.getDate()) || date.isBefore(expense.getDate())) {
+        if (date != null && !date.isEqual(expense.getDate()) && date.isBefore(expense.getDate())) {
             expense.setDate(date);
         }
-        if (!description.equals(expense.getDescription()) || !description.isBlank()) {
+        if (description != null && !description.equals(expense.getDescription()) && !description.isBlank()) {
             expense.setDescription(description);
         }
-        if (amount > 0 || amount != expense.getAmount().doubleValue()) {
+        if (amount != null && amount > 0 && amount != expense.getAmount().doubleValue()) {
             expense.setAmount(BigDecimal.valueOf(amount));
         }
 
 
         expenseRepository.save(expense);
-    }
-    public void deleteallusers() {
-        userRepository.deleteAll();
     }
 
     private User getUserFromJwtToken(String token) {
