@@ -6,6 +6,7 @@ import ffg.fillipe.expense_tracker.exceptions.expenses.ExpenseDoesNotExistsExcep
 import ffg.fillipe.expense_tracker.exceptions.expenses.ExpenseInvalidAmountException;
 import ffg.fillipe.expense_tracker.exceptions.expenses.ExpenseInvalidDateException;
 import ffg.fillipe.expense_tracker.exceptions.expenses.ExpenseNotOwnedByUserException;
+import ffg.fillipe.expense_tracker.exceptions.requests.RequestWithoutRequiredParamException;
 import ffg.fillipe.expense_tracker.exceptions.user.UserAlreadyExistsException;
 import ffg.fillipe.expense_tracker.exceptions.user.UserDoesNotExistsException;
 import ffg.fillipe.expense_tracker.exceptions.user.UserInvalidCredentialsException;
@@ -98,6 +99,14 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(RequestWithoutRequiredParamException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handleRequestWithoutRequiredParamException(RequestWithoutRequiredParamException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage())
+        );
+    }
+
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException exception) {
@@ -106,4 +115,6 @@ public class GlobalExceptionHandler {
                         new ErrorResponse("Internal error")
                 );
     }
+
+
 }

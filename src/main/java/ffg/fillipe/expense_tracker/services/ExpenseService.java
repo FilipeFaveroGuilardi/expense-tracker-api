@@ -75,7 +75,7 @@ public class ExpenseService {
         User user = getUserFromJwtToken(token);
         LocalDate date = LocalDate.parse(expense.date(), Expense.DATE_FORMATTER);
 
-        if (expense.amount().doubleValue() < 0) {
+        if (expense.amount() < 0) {
             throw new ExpenseInvalidAmountException();
         }
         if (date.isAfter(LocalDate.now())) {
@@ -83,7 +83,7 @@ public class ExpenseService {
         }
 
         Expense newExpense = Expense.builder()
-                .amount(expense.amount())
+                .amount(BigDecimal.valueOf(expense.amount()))
                 .date(date)
                 .description(expense.description())
                 .user(user)
